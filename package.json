@@ -1,0 +1,17 @@
+{
+    "name": "kngrabber",
+    "version": "0.0.1",
+    "description": "Czech Register Nemovitosti mining tool.",
+    "private": true,
+    "main": "./app.js",
+    "dependencies": {
+        "async": "*",
+        "mongodb": "*",
+        "mongoose": "*",
+        "winston": "*"
+    },
+    "devDependencies": {
+        "nodeunit": "*"
+    }
+
+}
