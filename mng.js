@@ -9,7 +9,7 @@ var log = require('./logger');
 log.info('Connecting to MongoDB: ' + config.dbConnectionString);
 mongoose.connect(config.dbConnectionString);
 
-var db = mongose.connection;
+var db = mongoose.connection;
 db.on('error', function(err) {
     log.error('Connection error: ', err);
 });

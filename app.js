@@ -9,11 +9,32 @@
 
 var log = require('./logger');
 var Seed = require('./model/Seed');
+var config = require('./config');
+var Crawler = require('./crawler');
 
 // initialize seeds from default seeds
-Seed.find(function(err, seeds){
+config.defaultSeeds.forEach(function (seed) {
+    log.debug('Initializing defaultSeed', seed);
+    var dbSeed = new Seed({
+        'name': seed.name,
+        'url': seed.url
+    });
 
+    var seedObject = dbSeed.toObject();
+    delete seedObject._id;
+
+    Seed.update({name: seed.name}, {$set: seedObject}, {upsert: true}, function (err) {
+        if (err) {
+            log.debug(err);
+        }
+    });
 });
 
+// Start crawling
+var crawler = new Crawler(config.connections);
 
+setInterval(function () {
+    crawler.start();
+}, config.miningPeriod);
 
+crawler.start();

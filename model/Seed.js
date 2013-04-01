@@ -1,15 +1,17 @@
-var mng = require('../mng');
+var mng = require('../mng'),
+    Schema = mng.Schema,
+    model = mng.model;
 
 /**
  * Name must be unique.
  * @type {mng.Schema}
  */
-var seedSchema = new mng.Schema({
-    name: String,
-    url: String
+var seedSchema = new Schema({
+    name: {type: String, index: {unique: true, dropDups: true}},
+    url: String,
+    villageCode: Number
 });
 
-var SeedModel = mng.model('seed', seedSchema);
+module.exports = model('seed', seedSchema);
 
-module.exports = SeedModel;
 

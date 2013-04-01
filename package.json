@@ -8,7 +8,9 @@
         "async": "*",
         "mongodb": "*",
         "mongoose": "*",
-        "winston": "*"
+        "winston": "*",
+        "cheerio": "*",
+        "request": "*"
     },
     "devDependencies": {
         "nodeunit": "*"

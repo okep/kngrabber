@@ -2,23 +2,21 @@ var mng = require('../mng'),
     Schema = mng.Schema,
     model = mng.model;
 
-var plotSchema = new Schema({
-    plotNumber: {type: String, index: {unique: true}},
+var buildingSchema = new Schema({
+    buildingNumber: {type: String, index: {unique: false}},
     villageName: String,
     villageNumber: Number,
-    plotSize: Number,
-    plotType: String,
-    landType: String,
-    allPlotInformation: [Schema.Types.Mixed],     // whole "Informace o parcele" table
+    buildingType: String,
+    useKind: String,
+    allBuildingInformation: [Schema.Types.Mixed],
     owners:[ {
         name: String,
         address: String,
         share: String
     }],
-
     protection: [String],
     ownershipRestrictions: [String],
     otherRecords: [String]
 });
 
-module.exports = model('plot', plotSchema);
+module.exports = model('building', buildingSchema);
