@@ -4,8 +4,8 @@ var Job = require('./model/Job'),
     async = require('async'),
     request = require('request'),
     cheerio = require('cheerio'),
-    parser = require('parser'),
-    DocumentTypeEnum = parser.DocumentTypeEnum;
+    parsers = require('./parsers'),
+    DocumentTypeEnum = parsers.DocumentTypeEnum;
 
 /**
  *
@@ -49,6 +49,7 @@ Crawler.prototype.start = function start() {
                 function createAndSaveJob(seed, callback) {
                     var job = new Job({
                         url: seed.url,
+                        baseUrl: seed.baseUrl,
                         timestamp: new Date(),
                         villageCode: seed.villageCode
                     });
@@ -83,7 +84,7 @@ Crawler.prototype._crawl = function _crawl() {
         },
         function getTheUrl(job, callback) {
             log.debug('GET: ', job.url);
-            request(job.url, function(err, response, body){
+            request(job.baseUrl + job.url, function(err, response, body){
                 if(err) {
                     callback(err);
                 } else {
@@ -93,8 +94,7 @@ Crawler.prototype._crawl = function _crawl() {
             });
         },
         function parsePage($, callback) {
-            var type = parser.documentType($);
-
+            var type = parsers.documentType($);
 
             var obj = parser.parse($);
             throw "todo implement";

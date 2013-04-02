@@ -26,7 +26,8 @@ var confing = {
     "defaultSeeds": [
         {
             "name": "Strancice",
-            "url": "http://nahlizenidokn.cuzk.cz/MapaIdentifikace.aspx?&x=-726618&y=-1061203&maplayers=8244EA23",
+            "baseUrl": "http://nahlizenidokn.cuzk.cz/",
+            "url": "MapaIdentifikace.aspx?&x=-726618&y=-1061203&maplayers=8244EA23",
             "villageCode": 538809
         }
     ]

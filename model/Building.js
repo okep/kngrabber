@@ -1,14 +1,12 @@
-var mng = require('../mng'),
-    Schema = mng.Schema,
-    model = mng.model;
+var mng = require('../mng');
 
-var buildingSchema = new Schema({
-    buildingNumber: {type: String, index: {unique: false}},
+var buildingSchema = new mng.Schema({
+    buildingNumber: String,
     villageName: String,
     villageNumber: Number,
     buildingType: String,
     useKind: String,
-    allBuildingInformation: [Schema.Types.Mixed],
+    allBuildingInformation: [mng.Schema.Types.Mixed],
     owners:[ {
         name: String,
         address: String,
@@ -19,4 +17,6 @@ var buildingSchema = new Schema({
     otherRecords: [String]
 });
 
-module.exports = model('building', buildingSchema);
+buildingSchema.index({buildingNumber: 1, villageNumber: 1});
+
+module.exports = mng.model('building', buildingSchema);

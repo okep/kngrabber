@@ -17,7 +17,8 @@ config.defaultSeeds.forEach(function (seed) {
     log.debug('Initializing defaultSeed', seed);
     var dbSeed = new Seed({
         'name': seed.name,
-        'url': seed.url
+        'url': seed.url,
+        'baseUrl': seed.baseUrl
     });
 
     var seedObject = dbSeed.toObject();

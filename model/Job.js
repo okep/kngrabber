@@ -2,14 +2,13 @@
 * This Model represents Job of work for spider
 * */
 
-var mng = require('../mng'),
-    Schema = mng.Schema,
-    model = mng.model;
+var mng = require('../mng');
 
-var jobSchema = new Schema({
+var jobSchema = new mng.Schema({
     url: String,
+    baseUrl: String,
     timestamp: {type: Date, index: { unique:true }},
     villageCode: {type: Number}
 });
 
-module.exports = model('job', jobSchema);
+module.exports = mng.model('job', jobSchema);
