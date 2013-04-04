@@ -10,7 +10,8 @@
         "mongoose": "*",
         "winston": "*",
         "cheerio": "*",
-        "request": "*"
+        "request": "*",
+        "underscore": "*"
     },
     "devDependencies": {
         "nodeunit": "*"

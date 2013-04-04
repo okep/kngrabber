@@ -3,7 +3,7 @@ var mng = require('../mng');
 var buildingSchema = new mng.Schema({
     buildingNumber: String,
     villageName: String,
-    villageNumber: Number,
+    villageCode: Number,
     buildingType: String,
     useKind: String,
     allBuildingInformation: [mng.Schema.Types.Mixed],
@@ -17,6 +17,6 @@ var buildingSchema = new mng.Schema({
     otherRecords: [String]
 });
 
-buildingSchema.index({buildingNumber: 1, villageNumber: 1});
+buildingSchema.index({buildingNumber: 1, villageCode: 1});
 
 module.exports = mng.model('building', buildingSchema);

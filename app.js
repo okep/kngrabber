@@ -18,7 +18,8 @@ config.defaultSeeds.forEach(function (seed) {
     var dbSeed = new Seed({
         'name': seed.name,
         'url': seed.url,
-        'baseUrl': seed.baseUrl
+        'baseUrl': seed.baseUrl,
+        'villageCode': seed.villageCode
     });
 
     var seedObject = dbSeed.toObject();

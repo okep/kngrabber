@@ -5,10 +5,11 @@
 var mng = require('../mng');
 
 var jobSchema = new mng.Schema({
-    url: String,
+    url: { type: String, index: {unique: true}},
     baseUrl: String,
-    timestamp: {type: Date, index: { unique:true }},
-    villageCode: {type: Number}
+    timestamp: {type: Date},
+    villageCode: {type: Number},
+    visited: {type: Boolean, default: false}
 });
 
 module.exports = mng.model('job', jobSchema);

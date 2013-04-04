@@ -1,13 +1,13 @@
 var mng = require('../mng');
 
-var plotSchema = new mng.Schema({
+var _plotSchema = {
     plotNumber: String,
     villageName: String,
-    villageNumber: Number,
+    villageCode: Number,
     plotSize: Number,
     plotType: String,
     landType: String,
-    allPlotInformation: [mng.Schema.Types.Mixed],     // whole "Informace o parcele" table
+    allPlotInformation: mng.Schema.Types.Mixed,     // whole "Informace o parcele" table
     owners:[ {
         name: String,
         address: String,
@@ -17,8 +17,17 @@ var plotSchema = new mng.Schema({
     protection: [String],
     ownershipRestrictions: [String],
     otherRecords: [String]
+};
+
+var plotSchema = new mng.Schema({
+    data: _plotSchema,
+    timestamp: Date,
+    version: {type: Number, default: 0}
 });
 
-plotSchema.index({plotNumber:1, villageNumber: 1});
-
+plotSchema.index({
+    "data.plotNumber": 1,
+    "data.villageCode": 1,
+    "version": -1
+});
 module.exports = mng.model('plot', plotSchema);
