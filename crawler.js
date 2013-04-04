@@ -60,7 +60,7 @@ Crawler.prototype.start = function start() {
                         timestamp: new Date(),
                         villageCode: seed.villageCode
                     });
-                    job.save(function (err) {
+                    job.save(function (err, job) {
                         callback(err, job);
                     })
                 }
@@ -75,7 +75,13 @@ Crawler.prototype.start = function start() {
     });
 };
 
-Crawler.prototype._giveMeJob = function isSomeWork(callback) {
+Crawler.prototype._giveMeJob = function isSomeWork(callback, count) {
+    if(count) {
+        var query = Job.find({visited: false}).limit(count);
+        query.exec(function(err, jobs) {
+            callback(err, jobs);
+        });
+    }
     Job.findOne({visited: false}, function (err, job) {
         callback(err, job);
     });
@@ -85,42 +91,57 @@ Crawler.prototype._crawl = function _crawl(firstJob) {
     log.debug('Starting to crawl.');
     var that = this;
 
-    async.waterfall([
-        function visitTheJob(callback) {
-            var jobObject = firstJob.toObject();
+    var q = async.queue(function(jobToProcess, queueCallback){
+        async.waterfall([
+            function visitTheJob(callback) {
+                var jobObject = jobToProcess.toObject();
 
-            // mark job as visited
-            firstJob.update({visited: true}, function (err) {
-                callback(err, jobObject);
-            });
+                // mark job as visited
+                jobToProcess.update({visited: true}, function (err) {
+                    callback(err, jobObject);
+                });
 
-        },
-        function getTheUrl(job, callback) {
-            log.debug('GET: ', job.url);
-            request(job.baseUrl + job.url, function (err, response, body) {
-                if (err) {
-                    callback(err);
+            },
+            function getTheUrl(job, callback) {
+                log.debug('GET: ', job.url);
+                request(job.baseUrl + job.url, function (err, response, body) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        var $ = cheerio.load(body);
+                        callback(null, $, job)
+                    }
+                });
+            },
+            function parsePage($, job, callback) {
+                var type = parsers.documentType($);
+                if (type == DocumentTypeEnum.PLOT) {
+                    that._processPlot($, job, callback);
+                } else if (type == DocumentTypeEnum.BUILDING) {
+                    that._processBuilding($, callback);
                 } else {
-                    var $ = cheerio.load(body);
-                    callback(null, $, job)
+                    callback("Unknown document type: " + job.url);
                 }
-            });
-        },
-        function parsePage($, job, callback) {
-            var type = parsers.documentType($);
-            if (type == DocumentTypeEnum.PLOT) {
-                that._processPlot($, job, callback);
-            } else if (type == DocumentTypeEnum.BUILDING) {
-                that._processBuilding($, callback);
-            } else {
-                callback("Unknown document type: " + job.url);
             }
-        }
-    ], function result(err, result) {
-        if (err) {
-            log.error(err);
-        }
-    });
+        ], function result(err, result) {
+            if (err) {
+                log.error(err);
+            }
+            queueCallback(err);
+        });
+
+    }, that.connections);
+    q.drain = function() {
+        that._giveMeJob(function(err, jobs) {
+            if(err) {
+                log.error(err);
+            } else {
+                q.push(jobs);
+            }
+        }, that.connections*3);
+    };
+    q.push(firstJob);
+
 };
 
 /**
@@ -200,6 +221,7 @@ Crawler.prototype._processBuilding = function _processBuilding($, callback) {
 Crawler.prototype._downloadLinks = function _downloadLinks(linksPageUrl, job, callback) {
     async.waterfall([
         function downloadLinksPage(callback) {
+            log.debug("GET links: " + linksPageUrl);
             request(job.baseUrl + linksPageUrl, function (err, response, body) {
                 if (err) {
                     callback(err);
@@ -211,6 +233,7 @@ Crawler.prototype._downloadLinks = function _downloadLinks(linksPageUrl, job, ca
         },
         function parseLinksPage($, callback) {
             var links = parsers.listParse($);
+            count = links.length;
             if (!_.isEmpty(links)) {
                 links.forEach(function (link) {
                     var newJob = new Job({
@@ -221,18 +244,17 @@ Crawler.prototype._downloadLinks = function _downloadLinks(linksPageUrl, job, ca
                         visited: false
                     }).save(function (err) {
                             // ignore error
-                            if (err) {
-                                log.debug(err);
+                            if(--count == 0) {
+                                callback();
                             }
-                            callback();
                         })
                 });
             }
-            callback();
         }
     ],
         function results(err) {
             callback(err);
+
         });
 };
 

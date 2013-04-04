@@ -13,7 +13,7 @@ var confing = {
     "dbConnectionString": "mongodb://localhost/kngrabber",
 
     // number of parallel connections
-    "connections": 1,
+    "connections": 5,
 
     // time period between mining executions in milliseconds
     "miningPeriod": 24*3600*1000,

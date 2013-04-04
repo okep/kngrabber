@@ -1,28 +1,46 @@
-var async = require('async'),
-    log = require('./logger');
+var async = require('async');
 
-require('look').start();
-
-var jobCounter = 0;
-var giveMeJob = function giveMeJob(callback) {
-    callback("Job "+jobCounter++);
+async.nextTick = function (fn) {
+    setImmediate(fn);
 };
+/*
 
-var q = async.queue(function(job, callback){
-    log.debug("executing " + job);
-    callback();
-});
+ var jobCounter = 0;
+ var giveMeJob = function giveMeJob(callback) {
+ callback("Job "+jobCounter++);
+ };
 
-q.drain = function() {
-    giveMeJob(function(job){
-        q.push(job, function(){
-            log.debug("Finished " + job);
-        })
+
+
+ var q = async.queue(function(job, callback){
+ console.log("executing " + job);
+ callback();
+ });
+
+ q.drain = function() {
+ giveMeJob(function(job){
+ q.push(job, function(){
+ console.log("Finished " + job);
+ })
+ });
+ };
+
+ giveMeJob(function(job){
+ q.push(job, function(){
+ console.log("Finished " + job);
+ })
+ });
+ */
+
+var pole = [1, 2, 3];
+
+async.waterfall([
+    function (callback) {
+        pole.forEach(function (value) {
+            callback(null, value);
+        });
+    }
+],
+    function (err, value) {
+        console.log(value);
     });
-};
-
-giveMeJob(function(job){
-    q.push(job, function(){
-        log.debug("Finished " + job);
-    })
-});
