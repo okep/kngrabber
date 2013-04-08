@@ -7,14 +7,14 @@
  */
 
 
-var log = require('./logger');
+var log = require('./thirdparty/logger');
 var Seed = require('./model/Seed');
-var config = require('./config');
-var Crawler = require('./crawler');
+var config = require('./common/config');
+var Crawler = require('./grabber/crawler');
 
 // initialize seeds from default seeds
 config.defaultSeeds.forEach(function (seed) {
-    log.debug('Initializing defaultSeed', seed);
+    log.debug('Initializing defaultSeeds ', seed);
     var dbSeed = new Seed({
         'name': seed.name,
         'url': seed.url,

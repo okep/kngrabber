@@ -51,6 +51,10 @@ var plotParse = function plotParse($page) {
     ret.landType = mainTable['Druh pozemku:'];
     ret.owners = parseOwnersTable($content.children('table[summary="Vlastníci, jiní oprávnění"]'));
 
+    if(ret.allPlotInformation['Stavba na parcele:']) {
+        ret._buildinkLink = $content.find('a[title="Informace o budově"]').first().attr('href');
+    }
+
     ret.protection = singleColumnTable($content.children('table[summary="Způsob ochrany nemovitosti"]'));
     ret.ownershipRestrictions = singleColumnTable($content.children('table[summary="Omezení vlastnického práva"]'));
     ret.otherRecords = singleColumnTable($content.children('table[summary="Jiné zápisy"]'));

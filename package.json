@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "description": "Czech Register Nemovitosti mining tool.",
     "private": true,
-    "main": "./app.js",
+    "main": "./grabber.js",
     "dependencies": {
         "async": "*",
         "mongodb": "*",

@@ -2,7 +2,7 @@
 * This Model represents Job of work for spider
 * */
 
-var mng = require('../mng');
+var mng = require('../thirdparty/mng');
 
 var jobSchema = new mng.Schema({
     url: { type: String, index: {unique: true}},

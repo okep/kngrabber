@@ -1,4 +1,4 @@
-var mng = require('../mng');
+var mng = require('../thirdparty/mng');
 
 var _plotSchema = {
     plotNumber: String,

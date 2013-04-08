@@ -10,8 +10,8 @@ var isEqual = function isEqual(x, y) {
     // test there constructor.
 
     for (var p in x) {
-        if(p == '_id') continue;
-        // ignore ids
+        if(p.indexOf('_') == 0) continue;
+        // ignore private
         if (!x.hasOwnProperty(p)) continue;
         // other properties were tested using x.constructor === y.constructor
 

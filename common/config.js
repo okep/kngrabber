@@ -13,10 +13,13 @@ var confing = {
     "dbConnectionString": "mongodb://localhost/kngrabber",
 
     // number of parallel connections
-    "connections": 5,
+    "connections": 1,
 
     // time period between mining executions in milliseconds
     "miningPeriod": 24*3600*1000,
+
+    // timeout on HTTP calls in milliseconds
+    "httpTimeout": 7000,
 
 
     /*
@@ -29,6 +32,12 @@ var confing = {
             "baseUrl": "http://nahlizenidokn.cuzk.cz/",
             "url": "MapaIdentifikace.aspx?&x=-726618&y=-1061203&maplayers=8244EA23",
             "villageCode": 538809
+        },
+        {
+            "name": "Svetice",
+            "baseUrl": "http://nahlizenidokn.cuzk.cz/",
+            "url": "MapaIdentifikace.aspx?&x=-727373&y=-1058301&maplayers=8244EA23",
+            "villageCode": 538841
         }
     ]
 };

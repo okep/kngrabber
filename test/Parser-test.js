@@ -1,7 +1,7 @@
 var fs = require('fs'),
     async = require('async'),
     cheerio = require('cheerio'),
-    parsers = require('../parsers'),
+    parsers = require('../grabber/parsers'),
     DocumentTypeEnum = parsers.DocumentTypeEnum;
 
 module.exports = {
@@ -31,7 +31,14 @@ module.exports = {
                     that.someFile = cheerio.load(data);
                     clb(err);
                 })
+            },
+            function readPlotWithBuildingFile(clb) {
+                fs.readFile('./test/resources/plotwithbuilding.html', 'utf8', function (err, data) {
+                    that.plotWithBuildingFile = cheerio.load(data);
+                    clb(err);
+                })
             }
+
 
         ],
             function (err) {
@@ -114,7 +121,44 @@ module.exports = {
             {"village": "Světice u Říčan", "type": 1, "url": "ZobrazObjekt.aspx?&typ=parcela&id=3127717209"}
         ], "list page not correctly parsed");
         test.done();
+    },
+    "Plot With Building HTML parsing test": function (test) {
+        var parsedPlot = parsers.plotParse(this.plotWithBuildingFile);
+        test.deepEqual(parsedPlot, {
+            "allPlotInformation": {
+                "Parcelní číslo:": "st. 590",
+                "Obec:": "Světice [538841]",
+                "Katastrální území:": "Světice u Říčan [760391]",
+                "Číslo LV:": "186",
+                "Výměra [m2]:": "115",
+                "Typ parcely:": "Parcela katastru nemovitostí",
+                "Mapový list:": "KMD",
+                "Určení výměry:": "Jiným číselným způsobem",
+                "Druh pozemku:": "zastavěná plocha a nádvoří",
+                "Stavba na parcele:": "č.p. 182"
+            },
+            "plotNumber": "st. 590",
+            "villageName": "Světice",
+            "villageCode": 538841,
+            "plotSize": 115,
+            "plotType": "Parcela katastru nemovitostí",
+            "landType": "zastavěná plocha a nádvoří",
+            "owners": [
+                {
+                    "name": "SJM Lancinger Jan a Lancingerová Zuzana",
+                    "address": "Na Lada 182, 25101 Světice",
+                    "share": ""
+                }
+            ],
+            "_buildinkLink": "ZobrazObjekt.aspx?encrypted=-NDhOLAVvbbk8KNqb3KJoyJOghb2H1EH5ZKpWdGRHSGQCy4UX8trB1WxzV4jZrfLSTy08ww5dvjsk3jjQEN6UuXrlCAK2oq0k2dRpGR62o5GaGmgZmnABA==",
+            "protection": [],
+            "ownershipRestrictions": [],
+            "otherRecords": [],
+            "neighbourPlots": "ZobrazObjekt.aspx?encrypted=RsD8BzV0ox0b_oE-fkMLrtWQ_zgRZX0UCdLuev7NGcNiSgxr6Ewj4sOIKiDrNhIisP7gxze89aVXc9J2DU8lg-VVNFuvdVkuhbZ2PankmEzeDahYvn0CFr5ryGVpTPEvBAn6sFilF3U="
+        }, "Parsed plot is not correct.");
+        test.done();
     }
+
 
 
 };

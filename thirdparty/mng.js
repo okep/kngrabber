@@ -3,7 +3,7 @@
  */
 
 var mongoose = require('mongoose');
-var config = require('./config');
+var config = require('./../common/config');
 var log = require('./logger');
 
 log.info('Connecting to MongoDB: ' + config.dbConnectionString);
