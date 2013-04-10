@@ -181,88 +181,92 @@ Crawler.prototype._processPlot = function _processPlot($, job, callback) {
     log.debug('Processing plot ', job.url);
     var that = this;
 
-    var plotObject = parsers.plotParse($);
-    if (plotObject.villageCode == job.villageCode) {
-        log.debug('Is in the same village: ' + job.url);
-        var links = plotObject.neighbourPlots;
-        var buildingLink = plotObject._buildinkLink;
-        delete  plotObject.neighbourPlots;
-        delete plotObject._buildinkLink;
+    try {
+        var plotObject = parsers.plotParse($);
+        if (plotObject.villageCode == job.villageCode) {
+            log.debug('Is in the same village: ' + job.url);
+            var links = plotObject.neighbourPlots;
+            var buildingLink = plotObject._buildinkLink;
+            delete  plotObject.neighbourPlots;
+            delete plotObject._buildinkLink;
 
-        async.waterfall( [
-                function findPlotInDb(callback) {
-                    log.debug('Find the plot in DB: ' + job.url);
-                    // get the plot from db
-                    Plot.where('data.plotNumber', plotObject.plotNumber)
-                        .where('data.villageCode', plotObject.villageCode)
-                        .sort('-version')
-                        .limit(1)
-                        .exec(function (err, plot) {
-                            if (err) {
-                                callback(err);
-                            } else {
-                                if (!_.isEmpty(plot)) {
-                                    log.debug('Plot found in db: ' + job.url);
-                                    if (!utils.isEqual(plot[0].toObject().data, plotObject)) {
-                                        // create new plot
-                                        log.debug('The new version is different, creating new: ' + job.url);
+            async.waterfall([
+                    function findPlotInDb(callback) {
+                        log.debug('Find the plot in DB: ' + job.url);
+                        // get the plot from db
+                        Plot.where('data.plotNumber', plotObject.plotNumber)
+                            .where('data.villageCode', plotObject.villageCode)
+                            .sort('-version')
+                            .limit(1)
+                            .exec(function (err, plot) {
+                                if (err) {
+                                    callback(err);
+                                } else {
+                                    if (!_.isEmpty(plot)) {
+                                        log.debug('Plot found in db: ' + job.url);
+                                        if (!utils.isEqual(plot[0].toObject().data, plotObject)) {
+                                            // create new plot
+                                            log.debug('The new version is different, creating new: ' + job.url);
+                                            (new Plot({
+                                                data: plotObject,
+                                                timestamp: new Date(),
+                                                version: plot[0].version + 1
+                                            })).save(function (err) {
+                                                    log.debug('New version created: ' + job.url);
+                                                    callback(err)
+                                                });
+                                        } else {
+                                            callback();
+                                        }
+                                    } else {
+                                        log.debug('Plot doesnt exist, creating new: ' + job.url);
                                         (new Plot({
                                             data: plotObject,
                                             timestamp: new Date(),
-                                            version: plot[0].version + 1
+                                            version: 0
                                         })).save(function (err) {
-                                                log.debug('New version created: ' + job.url);
+                                                log.debug('New plot created: ' + job.url);
                                                 callback(err)
                                             });
-                                    } else {
-                                        callback();
                                     }
-                                } else {
-                                    log.debug('Plot doesnt exist, creating new: ' + job.url);
-                                    (new Plot({
-                                        data: plotObject,
-                                        timestamp: new Date(),
-                                        version: 0
-                                    })).save(function (err) {
-                                            log.debug('New plot created: ' + job.url);
-                                            callback(err)
-                                        });
                                 }
-                            }
-                        });
-                },
-                function processBuildingLink(callback) {
-                    if (buildingLink) {
-                        log.debug('Create job with building: ' + job.url);
-                        var newJob = new Job({
-                            url: buildingLink,
-                            baseUrl: job.baseUrl,
-                            timestamp: new Date(),
-                            villageCode: job.villageCode,
-                            visited: false
-                        }).save(function (err) {
-                                log.debug("Job for builiding: " + job.url);
-                                // ignore error
-                                callback();
-                            })
-                    } else {
-                        callback();
-                    }
+                            });
+                    },
+                    function processBuildingLink(callback) {
+                        if (buildingLink) {
+                            log.debug('Create job with building: ' + job.url);
+                            var newJob = new Job({
+                                url: buildingLink,
+                                baseUrl: job.baseUrl,
+                                timestamp: new Date(),
+                                villageCode: job.villageCode,
+                                visited: false
+                            }).save(function (err) {
+                                    log.debug("Job for builiding: " + job.url);
+                                    // ignore error
+                                    callback();
+                                })
+                        } else {
+                            callback();
+                        }
 
-                },
-                function downloadLinks(callback) {
-                    // download links
-                    that._downloadLinks(links, job, callback);
+                    },
+                    function downloadLinks(callback) {
+                        // download links
+                        that._downloadLinks(links, job, callback);
+                    }
+                ], function (err, result) {
+                    log.debug('End of plot processing: ' + job.url);
+                    callback(err);
                 }
-            ], function(err, result) {
-                log.debug('End of plot processing: ' + job.url);
-                callback(err);
-            }
-        );
-    }
-    else {
-        log.debug('Plot in another village ', job.url);
-        callback();
+            );
+        }
+        else {
+            log.debug('Plot in another village ', job.url);
+            callback();
+        }
+    } catch (e) {
+        callback(e);
     }
 };
 
@@ -276,55 +280,59 @@ Crawler.prototype._processBuilding = function _processBuilding($, job, callback)
     log.debug('Processing building ', job.url);
     var that = this;
 
-    var buildingObject = parsers.plotParse($);
-    if (buildingObject.villageCode == job.villageCode) {
-        log.debug('Is in the same village: ' + job.url);
+    try {
+        var buildingObject = parsers.plotParse($);
+        if (buildingObject.villageCode == job.villageCode) {
+            log.debug('Is in the same village: ' + job.url);
 
-        log.debug('Find the building in DB: ' + job.url);
-        // get the plot from db
-        Plot.where('data.buildingNumber', buildingObject.buildingNumber)
-            .where('data.villageCode', buildingObject.villageCode)
-            .sort('-version')
-            .limit(1)
-            .exec(function (err, building) {
-                if (err) {
-                    callback(err);
-                } else {
-                    if (!_.isEmpty(building)) {
-                        log.debug('Building found in db: ' + job.url);
-                        if (!utils.isEqual(building[0].toObject().data, buildingObject)) {
-                            // create new building
-                            log.debug('The new version is different, creating new building: ' + job.url);
+            log.debug('Find the building in DB: ' + job.url);
+            // get the plot from db
+            Plot.where('data.buildingNumber', buildingObject.buildingNumber)
+                .where('data.villageCode', buildingObject.villageCode)
+                .sort('-version')
+                .limit(1)
+                .exec(function (err, building) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        if (!_.isEmpty(building)) {
+                            log.debug('Building found in db: ' + job.url);
+                            if (!utils.isEqual(building[0].toObject().data, buildingObject)) {
+                                // create new building
+                                log.debug('The new version is different, creating new building: ' + job.url);
+                                (new Building({
+                                    data: buildingObject,
+                                    timestamp: new Date(),
+                                    version: building[0].version + 1
+                                })).save(function (err) {
+                                        log.debug('New version created: ' + job.url);
+                                        if (err) {
+                                            callback(err)
+                                        }
+                                    });
+                            }
+                        } else {
+                            log.debug('Building doesnt exist, creating new: ' + job.url);
                             (new Building({
                                 data: buildingObject,
                                 timestamp: new Date(),
-                                version: building[0].version + 1
+                                version: 0
                             })).save(function (err) {
-                                    log.debug('New version created: ' + job.url);
+                                    log.debug('New building created: ' + job.url);
                                     if (err) {
                                         callback(err)
                                     }
                                 });
                         }
-                    } else {
-                        log.debug('Building doesnt exist, creating new: ' + job.url);
-                        (new Building({
-                            data: buildingObject,
-                            timestamp: new Date(),
-                            version: 0
-                        })).save(function (err) {
-                                log.debug('New building created: ' + job.url);
-                                if (err) {
-                                    callback(err)
-                                }
-                            });
                     }
-                }
-            });
-    }
-    else {
-        log.debug('Building in another village ', job.url);
-        callback();
+                });
+        }
+        else {
+            log.debug('Building in another village ', job.url);
+            callback();
+        }
+    } catch (e) {
+        callback(e);
     }
 };
 
